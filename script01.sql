@@ -64,7 +64,7 @@ CREATE TABLE visualizacao (
         REFERENCES usuario(email)
 );
 
-CREATE TABLE post_tag (
+CREATE TABLE passaro_tag (
     post_id INT NOT NULL,
     nome_passaro VARCHAR(30) NOT NULL,
     PRIMARY KEY(post_id,nome_passaro),

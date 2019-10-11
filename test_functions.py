@@ -1,91 +1,178 @@
 import pymysql
 
-def adiciona_perigo(conn, nome):
+
+
+
+
+''' TABELA USUARIOS '''
+def adiciona_usuario(conn, nome_usuario, email, nome_cidade):
     with conn.cursor() as cursor:
         try:
-            cursor.execute('INSERT INTO perigo (nome) VALUES (%s)', (nome))
+            cursor.execute('INSERT INTO usuario (nome_usuario, email, nome_cidade) VALUES (%s, %s, %s)', (nome_usuario, email, nome_cidade))
         except pymysql.err.IntegrityError as e:
-            raise ValueError(f'Não posso inserir {nome} na tabela perigo')
+            raise ValueError(f'Não posso inserir {nome_usuario} na tabela usuario')
 
-def acha_perigo(conn, nome):
+def acha_usuario(conn, email):
     with conn.cursor() as cursor:
-        cursor.execute('SELECT id FROM perigo WHERE nome = %s', (nome))
+        cursor.execute('SELECT email FROM usuario WHERE email = %s', (email))
         res = cursor.fetchone()
         if res:
             return res[0]
         else:
             return None
 
-def muda_nome_perigo(conn, id, novo_nome):
+def muda_nome_usuario(conn, email, novo_nome_usuario):
     with conn.cursor() as cursor:
         try:
-            cursor.execute('UPDATE perigo SET nome=%s where id=%s', (novo_nome, id))
+            cursor.execute('UPDATE usuario SET nome_usuario=%s where email=%s', (novo_nome_usuario, email))
         except pymysql.err.IntegrityError as e:
-            raise ValueError(f'Não posso alterar nome do id {id} para {novo_nome} na tabela perigo')
+            raise ValueError(f'Não posso alterar nome do usuario com email: {email} para {novo_nome_usuario} na tabela usuario')
 
-def remove_perigo(conn, id):
+def remove_usuario(conn, email):
     with conn.cursor() as cursor:
-        cursor.execute('DELETE FROM perigo WHERE id=%s', (id))
+        try:
+            cursor.execute('UPDATE usuario SET ativo=0 where email=%s', (email))
+        except pymysql.err.IntegrityError as e:
+            raise ValueError(f'Não posso remover o usuario de email: {email} (setar como inativo)')
 
-def lista_perigos(conn):
+def lista_usuarios(conn):
     with conn.cursor() as cursor:
-        cursor.execute('SELECT id from perigo')
+        cursor.execute('SELECT email, nome_usuario from usuario')
         res = cursor.fetchall()
-        perigos = tuple(x[0] for x in res)
-        return perigos
+        usuarios = tuple(x[0] for x in res)
+        return usuarios
 
-def adiciona_comida(conn, nome):
+
+
+
+
+''' TABELA POST '''
+def adiciona_post(conn, titulo, texto, url, email):
     with conn.cursor() as cursor:
         try:
-            cursor.execute('INSERT INTO comida (nome) VALUES (%s)', (nome))
+            cursor.execute('INSERT INTO post (titulo, texto, url, email) VALUES (%s, %s, %s, %s)', (titulo, texto, url, email))
         except pymysql.err.IntegrityError as e:
-            raise ValueError(f'Não posso inserir {nome} na tabela comida')
+            raise ValueError(f'Não posso inserir o post com titulo: {titulo} na tabela post')
 
-def acha_comida(conn, nome):
+def acha_post(conn, post_id):
     with conn.cursor() as cursor:
-        cursor.execute('SELECT id FROM comida WHERE nome = %s', (nome))
+        cursor.execute('SELECT id FROM post WHERE post_id = %s', (post_id))
         res = cursor.fetchone()
         if res:
             return res[0]
         else:
             return None
 
-def remove_comida(conn, id):
-    with conn.cursor() as cursor:
-        cursor.execute('DELETE FROM comida WHERE id=%s', (id))
-
-def muda_nome_comida(conn, id, novo_nome):
+def remove_post(conn, post_id):
     with conn.cursor() as cursor:
         try:
-            cursor.execute('UPDATE comida SET nome=%s where id=%s', (novo_nome, id))
+            cursor.execute('UPDATE post SET ativo=0 where post_id=%s', (post_id))
         except pymysql.err.IntegrityError as e:
-            raise ValueError(f'Não posso alterar nome do id {id} para {novo_nome} na tabela comida')
+            raise ValueError(f'Não posso remover o post de id: {post_id} (setar como inativo)')
 
-def lista_comidas(conn):
+
+
+''' TABELA VISUALIZACAO '''
+def visualiza_post(conn, email, post_id, tipo_aparelho, browser, ip):
     with conn.cursor() as cursor:
-        cursor.execute('SELECT id from comida')
+        try:
+            cursor.execute('INSERT INTO visualizacao (email, post_id, tipo_aparelho, browser, ip) VALUES (%s, %s, %s, %s, %s)', (email, post_id, tipo_aparelho, browser, ip))
+        except pymysql.err.IntegrityError as e:
+            raise ValueError(f'Não posso adicionar a visualizacao do post de id: {post_id} na tabela visualizacao')
+
+
+
+''' TABELA PASSARO_TAG '''
+def marca_passaro(conn, post_id, nome_passaro):
+    with conn.cursor() as cursor:
+        try:
+            cursor.execute('INSERT INTO passaro_tag (post_id, nome_passaro) VALUES (%s, %s)', (post_id, nome_passaro))
+        except pymysql.err.IntegrityError as e:
+            raise ValueError(f'Não posso adicionar a tag do passaro de nome: {nome_passaro} no post de id: {post_id} na tabela passaro_tag')
+
+
+''' TABELA USUARIO_TAG '''
+def marca_usuario(conn, post_id, email):
+    with conn.cursor() as cursor:
+        try:
+            cursor.execute('INSERT INTO usuario_tag (post_id, email) VALUES (%s, %s)', (post_id, email))
+            #cursor.execute('CALL marca_usuario(%s, %s)', (post_id, email))
+        except pymysql.err.IntegrityError as e:
+            raise ValueError(f'Não posso adicionar a tag do usuario de email: {email} no post de id: {post_id} na tabela usuario_tag')
+
+
+''' SELECOES '''
+
+def procura_post_por_passaro_tag(conn, nome_passaro):
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT post_id\
+                        FROM post, passaro_tag\
+                        WHERE post.post_id = passaro_tag.post_id\
+                        AND passaro_tag.nome_passaro=%s', (nome_passaro))
+
         res = cursor.fetchall()
-        comidas = tuple(x[0] for x in res)
-        return comidas
+        posts = tuple(x[0] for x in res)
+        return posts
 
-def adiciona_perigo_a_comida(conn, id_perigo, id_comida):
+def procura_post_por_usuario_tag(conn, email):
     with conn.cursor() as cursor:
-        cursor.execute('INSERT INTO comida_perigo VALUES (%s, %s)', (id_comida, id_perigo))
+        cursor.execute('SELECT post_id\
+                        FROM post, usuario_tag\
+                        WHERE post.post_id = usuario_tag.post_id\
+                        AND usuario_tag.email = %s', (email))
 
-def remove_perigo_de_comida(conn, id_perigo, id_comida):
-    with conn.cursor() as cursor:
-        cursor.execute('DELETE FROM comida_perigo WHERE id_perigo=%s AND id_comida=%s',(id_perigo, id_comida))
-
-def lista_comidas_de_perigo(conn, id_perigo):
-    with conn.cursor() as cursor:
-        cursor.execute('SELECT id_comida FROM comida_perigo WHERE id_perigo=%s', (id_perigo))
         res = cursor.fetchall()
-        comidas = tuple(x[0] for x in res)
-        return comidas
+        posts = tuple(x[0] for x in res)
+        return posts
 
-def lista_perigos_de_comida(conn, id_comida):
+def procura_post_por_autor(conn, email):
     with conn.cursor() as cursor:
-        cursor.execute('SELECT id_perigo FROM comida_perigo WHERE id_comida=%s', (id_comida))
+        cursor.execute('SELECT post_id\
+                        FROM post\
+                        WHERE post.email = %s', (email))
+
         res = cursor.fetchall()
-        perigos = tuple(x[0] for x in res)
-        return perigos
+        posts = tuple(x[0] for x in res)
+        return posts
+
+def procura_post_por_titulo(conn, titulo):
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT post_id\
+                        FROM post\
+                        WHERE post.titulo=%s', (titulo))
+
+        res = cursor.fetchall()
+        posts = tuple(x[0] for x in res)
+        return posts
+
+
+def procura_visualizacao_por_tipo_aparelho(conn, tipo_aparelho):
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT *\
+                        FROM visualizacao v\
+                        WHERE v.tipo_aparelho=%s', (tipo_aparelho))
+
+        res = cursor.fetchall()
+        visualizacao = tuple(x[0] for x in res)
+        return visualizacao
+
+def procura_usuario_por_cidade(conn, nome_cidade):
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT email\
+                        FROM usuario \
+                        WHERE usuario.nome_cidade=%s', (nome_cidade))
+
+        res = cursor.fetchall()
+        usuarios = tuple(x[0] for x in res)
+        return usuarios
+
+def procura_usuario_por_passaro(conn, nome_passaro):
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT email\
+                        FROM usuario, usuario_passaro\
+                        WHERE usuario.email = usuario_passaro.email\
+                        AND usuario_passaro.nome_passaro = %s', (nome_passaro))
+
+        res = cursor.fetchall()
+        usuarios = tuple(x[0] for x in res)
+        return usuarios

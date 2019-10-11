@@ -6,6 +6,7 @@ CREATE TABLE cidades (
     nome_cidade VARCHAR(30) NOT NULL,
     PRIMARY KEY(nome_cidade)
 );
+
 CREATE TABLE usuario (
     nome_usuario VARCHAR(30) NOT NULL,
     email VARCHAR(30) NOT NULL,
@@ -35,28 +36,20 @@ CREATE TABLE post (
     titulo VARCHAR(30) NOT NULL,
     texto VARCHAR(300) NULL,
     URL VARCHAR(80) NULL,
-    ativo INT NOT NULL DEFAULT 1,
+    ativo BOOLEAN NOT NULL DEFAULT 1,
     email VARCHAR(30) NOT NULL,
     PRIMARY KEY (post_id),
     FOREIGN KEY (email) 
         REFERENCES usuario(email)
 );
-CREATE TABLE usuario_post(
-    post_id INT NOT NULL,
-    email VARCHAR(30) NOT NULL,
-    PRIMARY KEY(post_id, email),
-    FOREIGN KEY(post_id)
-        REFERENCES post(post_id),
-    FOREIGN KEY(email)
-        REFERENCES usuario(email)
-);
+
 CREATE TABLE visualizacao (
     email VARCHAR(30) NOT NULL,
     post_id INT NOT NULL,
-    device VARCHAR(30) NOT NULL,
+    tipo_aparelho VARCHAR(30) NOT NULL,
     browser VARCHAR(30) NOT NULL,
     IP VARCHAR(30) NOT NULL,
-    view_time TIMESTAMP NOT NULL,
+    horario TIMESTAMP NOT NULL,
     PRIMARY KEY (email,post_id),
     FOREIGN KEY(post_id)
         REFERENCES post(post_id),
@@ -75,7 +68,7 @@ CREATE TABLE passaro_tag (
 
 );
 
-CREATE TABLE user_tag (
+CREATE TABLE usuario_tag (
     post_id INT NOT NULL,
     email VARCHAR(30) NOT NULL,
     PRIMARY KEY(post_id,email),

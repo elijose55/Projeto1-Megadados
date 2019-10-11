@@ -11,6 +11,7 @@ CREATE TABLE usuario (
     nome_usuario VARCHAR(30) NOT NULL,
     email VARCHAR(30) NOT NULL,
     nome_cidade VARCHAR(30) NOT NULL,
+    ativo BOOLEAN NOT NULL DEFAULT 1,
     PRIMARY KEY (email),
     FOREIGN KEY(nome_cidade)
         REFERENCES cidades(nome_cidade)

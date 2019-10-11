@@ -63,6 +63,15 @@ def acha_post(conn, post_id):
         else:
             return None
 
+def acha_post_ativo(conn, post_id):
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT id FROM post WHERE post_id = %s AND ativo = 1', (post_id))
+        res = cursor.fetchone()
+        if res:
+            return res[0]
+        else:
+            return None
+
 def remove_post(conn, post_id):
     with conn.cursor() as cursor:
         try:
@@ -101,6 +110,15 @@ def marca_usuario(conn, post_id, email):
             raise ValueError(f'Não posso adicionar a tag do usuario de email: {email} no post de id: {post_id} na tabela usuario_tag')
 
 
+''' TABELA usuario_passaro '''
+def cria_preferencia(conn, email, nome_passaro):
+    with conn.cursor() as cursor:
+        try:
+            cursor.execute('INSERT INTO usuario_passaro (email, nome_passaro) VALUES (%s, %s)', (email, nome_passaro))
+        except pymysql.err.IntegrityError as e:
+            raise ValueError(f'Não posso adicionar a preferencia do usuario de email: {email} ao passaro: {nome_passaro} na tabela usuario_passaro')
+
+
 ''' SELECOES '''
 
 def procura_post_por_passaro_tag(conn, nome_passaro):
@@ -109,6 +127,17 @@ def procura_post_por_passaro_tag(conn, nome_passaro):
                         FROM post, passaro_tag\
                         WHERE post.post_id = passaro_tag.post_id\
                         AND passaro_tag.nome_passaro=%s', (nome_passaro))
+
+        res = cursor.fetchall()
+        posts = tuple(x[0] for x in res)
+        return posts
+
+def procura_passaro_tag_por_post(conn, post_id):
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT nome_passaro\
+                        FROM post, passaro_tag\
+                        WHERE post.post_id = passaro_tag.post_id\
+                        AND passaro_tag.post_id=%s', (post_id))
 
         res = cursor.fetchall()
         posts = tuple(x[0] for x in res)
@@ -125,6 +154,17 @@ def procura_post_por_usuario_tag(conn, email):
         posts = tuple(x[0] for x in res)
         return posts
 
+def procura_usuario_tag_por_post(conn, post_id):
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT email\
+                        FROM post, usuario_tag\
+                        WHERE post.post_id = usuario_tag.post_id\
+                        AND usuario_tag.post_id = %s', (post_id))
+
+        res = cursor.fetchall()
+        posts = tuple(x[0] for x in res)
+        return posts
+
 def procura_post_por_autor(conn, email):
     with conn.cursor() as cursor:
         cursor.execute('SELECT post_id\
@@ -134,6 +174,18 @@ def procura_post_por_autor(conn, email):
         res = cursor.fetchall()
         posts = tuple(x[0] for x in res)
         return posts
+
+def procura_post_ativo_por_autor(conn, email):
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT post_id\
+                        FROM post\
+                        WHERE post.email = %s\
+                        AND post.ativo = 1', (email))
+
+        res = cursor.fetchall()
+        posts = tuple(x[0] for x in res)
+        return posts
+
 
 def procura_post_por_titulo(conn, titulo):
     with conn.cursor() as cursor:
@@ -156,6 +208,16 @@ def procura_visualizacao_por_tipo_aparelho(conn, tipo_aparelho):
         visualizacao = tuple(x[0] for x in res)
         return visualizacao
 
+def procura_visualizacao_por_usuario(conn, email):
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT *\
+                        FROM visualizacao v\
+                        WHERE v.email=%s', (email))
+
+        res = cursor.fetchall()
+        visualizacao = tuple(x[0] for x in res)
+        return visualizacao
+
 def procura_usuario_por_cidade(conn, nome_cidade):
     with conn.cursor() as cursor:
         cursor.execute('SELECT email\
@@ -166,7 +228,7 @@ def procura_usuario_por_cidade(conn, nome_cidade):
         usuarios = tuple(x[0] for x in res)
         return usuarios
 
-def procura_usuario_por_passaro(conn, nome_passaro):
+def procura_usuario_por_passaro(conn, nome_passaro): #preferencia
     with conn.cursor() as cursor:
         cursor.execute('SELECT email\
                         FROM usuario, usuario_passaro\
@@ -176,3 +238,14 @@ def procura_usuario_por_passaro(conn, nome_passaro):
         res = cursor.fetchall()
         usuarios = tuple(x[0] for x in res)
         return usuarios
+
+def procura_passaro_por_usuario(conn, email): #preferencia
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT nome_passaro\
+                        FROM usuario, usuario_passaro\
+                        WHERE usuario.email = usuario_passaro.email\
+                        AND usuario_passaro.email = %s', (email))
+
+        res = cursor.fetchall()
+        passaros = tuple(x[0] for x in res)
+        return passaros

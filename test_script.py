@@ -175,7 +175,7 @@ class TestProjeto(unittest.TestCase):
         conn = self.__class__.connection
 
         titulo = 'Meu primeiro post sobre passaros!'
-        texto = 'Voce sabia que um avestruz tem o mesmo tamanho de um camelo – 1,80 a 2,50 metros de altura.'
+        texto = 'Voce sabia que um avestruz.'
         email = 'elijose55@hotmail.com'
         url = 'auera.app'
 
@@ -302,26 +302,6 @@ class TestProjeto(unittest.TestCase):
         self.assertIsNotNone(post)
         self.assertEqual(post, post_id)
 
-    def test_procura_post_por_passaro_tag(self):
-        conn = self.__class__.connection
-				nome_passaro = "avestruz"
-        
-
-        # Adiciona um post.
-        adiciona_post(conn, titulo, texto, url, email)
-
-        # Checa se o post existe e esta ativo.
-        post_id = acha_post_ativo(conn, post_id)
-        self.assertIsNotNone(post_id)
-
-        # Visualiza o post
-        visualiza_post(conn, email_visualizacao, post_id,
-                       tipo_aparelho, browser, ip)
-
-        # Checa se a visualizacao foi adicionada na tabela VISUALIZACAO
-        post = procura_visualizacao_por_usuario(conn, email_visualizacao)
-        self.assertIsNotNone(post)
-        self.assertEqual(post, post_id)
 
     def run_sql_script(filename):
         global config

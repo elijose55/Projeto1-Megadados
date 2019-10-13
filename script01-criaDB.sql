@@ -37,7 +37,7 @@ CREATE TABLE usuario_passaro
 CREATE TABLE post
 (
     post_id INT NOT NULL
-    AUTO INCREMENT,
+    AUTO_INCREMENT,
     titulo VARCHAR
     (30) NOT NULL,
     texto VARCHAR

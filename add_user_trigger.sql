@@ -14,7 +14,7 @@ BEGIN
 END;
 
 CREATE TRIGGER add_passaro_por_marcacao
-BEFORE INSERT ON post_tag
+BEFORE INSERT ON passaro_tag
 FOR EACH ROW
 BEGIN
   IF NOT(NEW.nome_passaro IN (SELECT * FROM passaro)) THEN INSERT INTO passaro(nome_passaro)

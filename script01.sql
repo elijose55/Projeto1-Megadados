@@ -34,7 +34,7 @@ CREATE TABLE usuario_passaro (
 
 CREATE TABLE post (
     post_id INT NOT NULL AUTO_INCREMENT,
-    titulo VARCHAR(30) NOT NULL,
+    titulo VARCHAR(300) NOT NULL,
     texto VARCHAR(300) NULL,
     URL VARCHAR(80) NULL,
     ativo BOOLEAN NOT NULL DEFAULT 1,
@@ -50,7 +50,7 @@ CREATE TABLE visualizacao (
     tipo_aparelho VARCHAR(30) NOT NULL,
     browser VARCHAR(30) NOT NULL,
     IP VARCHAR(30) NOT NULL,
-    horario TIMESTAMP NOT NULL,
+    horario TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (email,post_id),
     FOREIGN KEY(post_id)
         REFERENCES post(post_id),

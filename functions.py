@@ -21,6 +21,16 @@ def acha_usuario(conn, email):
         else:
             return None
 
+
+def acha_usuario_ativo(conn, email):
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT email FROM usuario WHERE email = %s AND ativo = 1', (email))
+        res = cursor.fetchone()
+        if res:
+            return res[0]
+        else:
+            return None
+
 def muda_nome_usuario(conn, email, novo_nome_usuario):
     with conn.cursor() as cursor:
         try:
@@ -63,9 +73,9 @@ def acha_post(conn, post_id):
         else:
             return None
 
-def acha_post_ativo(conn, post_id):
+def acha_post_ativo(conn, titulo, email):
     with conn.cursor() as cursor:
-        cursor.execute('SELECT id FROM post WHERE post_id = %s AND ativo = 1', (post_id))
+        cursor.execute('SELECT post_id FROM post WHERE titulo = %s AND email = %s AND ativo = 1', (titulo, email))
         res = cursor.fetchone()
         if res:
             return res[0]
@@ -123,36 +133,30 @@ def cria_preferencia(conn, email, nome_passaro):
 
 def procura_post_por_passaro_tag(conn, nome_passaro):
     with conn.cursor() as cursor:
-        cursor.execute('SELECT post_id\
-                        FROM post, passaro_tag\
-                        WHERE post.post_id = passaro_tag.post_id\
-                        AND passaro_tag.nome_passaro=%s', (nome_passaro))
+        cursor.execute('SELECT a.post_id\
+                        FROM post a, passaro_tag b\
+                        WHERE a.post_id = b.post_id\
+                        AND b.nome_passaro=%s', (nome_passaro))
 
         res = cursor.fetchall()
-        posts = tuple(x[0] for x in res)
-        return posts
-
-def procura_passaro_tag_por_post(conn, post_id):
-    with conn.cursor() as cursor:
-        cursor.execute('SELECT nome_passaro\
-                        FROM post, passaro_tag\
-                        WHERE post.post_id = passaro_tag.post_id\
-                        AND passaro_tag.post_id=%s', (post_id))
-
-        res = cursor.fetchall()
-        posts = tuple(x[0] for x in res)
-        return posts
+        if len(res) == 0 :
+                return None
+        else:
+                posts = tuple(x[0] for x in res)
+                return posts[0]
 
 def procura_post_por_usuario_tag(conn, email):
     with conn.cursor() as cursor:
-        cursor.execute('SELECT post_id\
-                        FROM post, usuario_tag\
-                        WHERE post.post_id = usuario_tag.post_id\
-                        AND usuario_tag.email = %s', (email))
+        cursor.execute('SELECT a.post_id\
+                        FROM post a, usuario_tag b, usuario c\
+                        WHERE a.post_id = b.post_id AND c.email= %s', (email))
 
         res = cursor.fetchall()
-        posts = tuple(x[0] for x in res)
-        return posts
+        if len(res) == 0 :
+                return None
+        else:
+                posts = tuple(x[0] for x in res)
+                return posts[0]
 
 def procura_usuario_tag_por_post(conn, post_id):
     with conn.cursor() as cursor:
@@ -165,15 +169,6 @@ def procura_usuario_tag_por_post(conn, post_id):
         posts = tuple(x[0] for x in res)
         return posts
 
-def procura_post_por_autor(conn, email):
-    with conn.cursor() as cursor:
-        cursor.execute('SELECT post_id\
-                        FROM post\
-                        WHERE post.email = %s', (email))
-
-        res = cursor.fetchall()
-        posts = tuple(x[0] for x in res)
-        return posts
 
 def procura_post_ativo_por_autor(conn, email):
     with conn.cursor() as cursor:
@@ -183,69 +178,37 @@ def procura_post_ativo_por_autor(conn, email):
                         AND post.ativo = 1', (email))
 
         res = cursor.fetchall()
-        posts = tuple(x[0] for x in res)
-        return posts
+        if len(res) == 0 :
+                return None
+        else:
+                posts = tuple(x[0] for x in res)
+                return posts[0]
 
 
-def procura_post_por_titulo(conn, titulo):
-    with conn.cursor() as cursor:
-        cursor.execute('SELECT post_id\
-                        FROM post\
-                        WHERE post.titulo=%s', (titulo))
-
-        res = cursor.fetchall()
-        posts = tuple(x[0] for x in res)
-        return posts
-
-
-def procura_visualizacao_por_tipo_aparelho(conn, tipo_aparelho):
-    with conn.cursor() as cursor:
-        cursor.execute('SELECT *\
-                        FROM visualizacao v\
-                        WHERE v.tipo_aparelho=%s', (tipo_aparelho))
-
-        res = cursor.fetchall()
-        visualizacao = tuple(x[0] for x in res)
-        return visualizacao
 
 def procura_visualizacao_por_usuario(conn, email):
     with conn.cursor() as cursor:
-        cursor.execute('SELECT *\
+        cursor.execute('SELECT post_id\
                         FROM visualizacao v\
                         WHERE v.email=%s', (email))
 
         res = cursor.fetchall()
-        visualizacao = tuple(x[0] for x in res)
-        return visualizacao
+        if len(res) == 0 :
+                return None
+        else:
+                visualizacao = tuple(x[0] for x in res)
+                return visualizacao[0]
 
-def procura_usuario_por_cidade(conn, nome_cidade):
-    with conn.cursor() as cursor:
-        cursor.execute('SELECT email\
-                        FROM usuario \
-                        WHERE usuario.nome_cidade=%s', (nome_cidade))
-
-        res = cursor.fetchall()
-        usuarios = tuple(x[0] for x in res)
-        return usuarios
-
-def procura_usuario_por_passaro(conn, nome_passaro): #preferencia
-    with conn.cursor() as cursor:
-        cursor.execute('SELECT email\
-                        FROM usuario, usuario_passaro\
-                        WHERE usuario.email = usuario_passaro.email\
-                        AND usuario_passaro.nome_passaro = %s', (nome_passaro))
-
-        res = cursor.fetchall()
-        usuarios = tuple(x[0] for x in res)
-        return usuarios
 
 def procura_passaro_por_usuario(conn, email): #preferencia --
     with conn.cursor() as cursor:
         cursor.execute('SELECT nome_passaro\
-                        FROM usuario, usuario_passaro\
-                        WHERE usuario.email = usuario_passaro.email\
-                        AND usuario_passaro.email = %s', (email))
+                        FROM usuario NATURAL JOIN usuario_passaro\
+                        WHERE usuario_passaro.email = %s AND usuario.ativo = 1', (email))
 
         res = cursor.fetchall()
-        passaros = tuple(x[0] for x in res)
-        return passaros
+        if len(res) == 0 :
+                return None
+        else:
+                passaros = tuple(x[0] for x in res)
+                return passaros[0]

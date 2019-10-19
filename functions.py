@@ -129,6 +129,31 @@ def cria_preferencia(conn, email, nome_passaro):
             raise ValueError(f'Não posso adicionar a preferencia do usuario de email: {email} ao passaro: {nome_passaro} na tabela usuario_passaro')
 
 
+''' TABELA curtidas '''
+def adiciona_curtida(conn, email, post_id, tipo):
+    with conn.cursor() as cursor:
+        try:
+            cursor.execute('CALL adiciona_curtidas(%s, %s, %s)', (email, post_id, tipo))
+        except pymysql.err.IntegrityError as e:
+            raise ValueError(f'Não posso adicionar a curtida do usuario de email: {email} no post de id: {post_id} na tabela curtidas')
+
+def remove_curtida(conn, email, post_id):
+    with conn.cursor() as cursor:
+        try:
+            cursor.execute('DELETE FROM curtidas WHERE email=%s AND post_id=%s', (email, post_id))
+        except pymysql.err.IntegrityError as e:
+            raise ValueError(f'Não posso remover a curtida do usuario de email: {email} no post de id: {post_id} da tabela curtidas')
+
+def acha_curtidas_post(conn, post_id):
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT tipo FROM curtidas WHERE post_id = %s', (post_id))
+        res = cursor.fetchone()
+        if res:
+            return res[0]
+        else:
+            return None
+
+
 ''' SELECOES '''
 
 def procura_post_por_passaro_tag(conn, nome_passaro):

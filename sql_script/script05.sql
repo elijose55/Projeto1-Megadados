@@ -1,8 +1,8 @@
 USE REDESOCIAL;
-DROP PROCEDURE IF EXISTS adiciona_curtida;
+DROP PROCEDURE IF EXISTS adiciona_curtidas;
 
 DELIMITER //
-CREATE PROCEDURE adiciona_curtida(IN email_usuario VARCHAR(30), IN id_post INT, IN tipo_curtida BOOLEAN)
+CREATE PROCEDURE adiciona_curtidas(IN email_usuario VARCHAR(30), IN id_post INT, IN tipo_curtida BOOLEAN)
 BEGIN
 	IF((SELECT COUNT(email) FROM curtidas WHERE email=email_usuario AND post_id = id_post )>0, 1,0) = 1 THEN
 		IF(SELECT tipo FROM curtidas WHERE email=email_usuario AND post_id = id_post ) != tipo THEN

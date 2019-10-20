@@ -41,3 +41,11 @@ CREATE VIEW consulta_quantidade_aparelho AS
 	SELECT browser, tipo_aparelho, COUNT(tipo_aparelho)
 	FROM visualizacao
 	GROUP BY browser, tipo_aparelho;
+
+
+DROP VIEW IF EXISTS consulta_URL_passaros;
+CREATE VIEW consulta_URL_passaros AS 
+	SELECT passaro.nome_passaro, post.URL
+	FROM passaro, post, passaro_tag
+	WHERE passaro.nome_passaro = passaro_tag.nome_passaro
+	AND passaro_tag.post_id = post.post_id;

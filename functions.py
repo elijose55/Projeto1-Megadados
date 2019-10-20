@@ -285,12 +285,20 @@ def consulta_quantidade_aparelho(conn):
 	with conn.cursor() as cursor:
 		cursor.execute('SELECT * FROM consulta_quantidade_aparelho')
 		res = cursor.fetchall()
-		print("RES", res)
 		if len(res) == 0 :
 				return None
 		else:
 			return res
 
+
+def consulta_URL_passaros(conn):
+	with conn.cursor() as cursor:
+		cursor.execute('SELECT * FROM consulta_URL_passaros')
+		res = cursor.fetchall()
+		if len(res) == 0 :
+				return None
+		else:
+			return res
 
 def coleta_marcacoes(texto): # Retorna as marcacoes de pessoas e passaros de um texto de um post a ser publicado
 
@@ -300,9 +308,17 @@ def coleta_marcacoes(texto): # Retorna as marcacoes de pessoas e passaros de um 
 
 	for i in palavras:
 		if(i[0] == "@"):    # Coletar marcacoes de pessoas
+			i.replace("!", "")
 			pessoas.append(i[1:])
 
 		if(i[0] == "#"):    # Coletar marcacoes de passaros
+			i.replace("!", "")
+			i.replace(".", "")
+			i.replace("?", "")
+			i.replace(")", "")
+			i.replace("-", "")
+			i.replace(":", "")
+			i.replace(";", "")
 			passaros.append(i[1:])
 	return pessoas, passaros
 

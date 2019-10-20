@@ -537,6 +537,44 @@ class TestProjeto(unittest.TestCase):
 		resultado = consulta_quantidade_aparelho(conn)
 
 
+	def test_consulta_URL_passaros(self):
+		conn = self.__class__.connection
+		email = 'elijose55@hotmail.com'
+		nome_passaro = 'avestruz'
+		nome_usuario = 'eli joseph'
+		nome_cidade = "sp"
+		url1 = 'avestruz.com'
+		url2 = 'papagaio.com'
+		url3 = 'galo.com'
+		titulo = 'Meu quarto post sobre passaros!'
+		texto1 = 'Voce sabia que um #avestruz tem o mesmo tamanho de 3 mini camelos – 1,80 a 2,50 metros de altura.'
+		texto2 = 'Vamo #papagaio!'
+		texto3 = "Meu #galo botou um ovo!?!"
+
+
+
+		# Adiciona o usuario que irá postar.
+		adiciona_usuario(conn, nome_usuario, email, nome_cidade)
+
+		# Adiciona um post sobre um passaro.
+		adiciona_post(conn, "1", texto1, url1, email)
+		post_id = acha_post_ativo(conn, "1", email)
+		self.assertIsNotNone(post_id)
+
+		# Adiciona um post sobre outro passaro.
+		adiciona_post(conn, "2", texto2, url2, email)
+		post_id = acha_post_ativo(conn, "2", email)
+		self.assertIsNotNone(post_id)
+
+		# Adiciona um post sobre outro passaro.
+		adiciona_post(conn, "3", texto3, url3, email)
+		post_id = acha_post_ativo(conn, "3", email)
+		self.assertIsNotNone(post_id)
+
+		resultado = consulta_URL_passaros(conn)
+		self.assertIsNotNone(resultado)
+		self.assertEqual(resultado, (('avestruz', 'avestruz.com'), ('galo', 'galo.com'), ('papagaio!', 'papagaio.com')) )
+
 
 def run_sql_script(filename):
 	global config

@@ -259,6 +259,16 @@ def consulta_post_ordem_cronologica_reversa(conn, email):
 				resultado = tuple(x[0] for x in res)
 				return resultado
 
+def consulta_usuario_popular(conn):
+	with conn.cursor() as cursor:
+		cursor.execute('SELECT * FROM consulta_usuario_popular')
+		res = cursor.fetchall()
+		print("AAAA", res)
+		if len(res) == 0 :
+				return None
+		else:
+			return res
+
 
 def coleta_marcacoes(texto): # Retorna as marcacoes de pessoas e passaros de um texto de um post a ser publicado
 

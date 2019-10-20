@@ -65,10 +65,8 @@ def adiciona_post(conn, titulo, texto, url, email):
 			cursor.execute('SELECT post_id FROM post WHERE post_id = LAST_INSERT_ID() LIMIT 1')
 			res = cursor.fetchone()
 			for i in pessoas:
-				print(i)
 				marca_usuario(conn, res[0], i)
 			for i in passaros:
-				print(i)
 				marca_passaro(conn, res[0], i)
 			
 		except pymysql.err.IntegrityError as e:
@@ -251,6 +249,16 @@ def procura_passaro_por_usuario(conn, email): #preferencia --
 				passaros = tuple(x[0] for x in res)
 				return passaros[0]
 
+def consulta_post_ordem_cronologica_reversa(conn, email):
+	with conn.cursor() as cursor:
+		cursor.execute('CALL consulta_post_ordem_cronologica_reversa(%s)', (email))
+		res = cursor.fetchall()
+		if len(res) == 0 :
+				return None
+		else:
+				resultado = tuple(x[0] for x in res)
+				return resultado
+
 
 def coleta_marcacoes(texto): # Retorna as marcacoes de pessoas e passaros de um texto de um post a ser publicado
 
@@ -265,3 +273,4 @@ def coleta_marcacoes(texto): # Retorna as marcacoes de pessoas e passaros de um 
 		if(i[0] == "#"):    # Coletar marcacoes de passaros
 			passaros.append(i[1:])
 	return pessoas, passaros
+

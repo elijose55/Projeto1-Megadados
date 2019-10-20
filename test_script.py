@@ -8,6 +8,7 @@ import re
 import subprocess
 import unittest
 import pymysql
+import time
 from functools import partial
 
 from functions import *
@@ -339,6 +340,38 @@ class TestProjeto(unittest.TestCase):
 		self.assertIsNone(tipo_curtida)
 
 
+	def test_consulta_post(self):
+
+		conn = self.__class__.connection
+
+		titulo1 = 'primeiro'
+		texto = 'Voce sabia que um avestruz tem o mesmo tamanho de um camelo.'
+		email = 'elijose55@hotmail.com'
+		url = 'auera.app'
+
+		titulo2 = 'segundo'
+		titulo3 = 'terceiro'
+
+		nome_usuario = 'eli joseph'
+		nome_cidade = "sp"
+
+		# Adiciona o usuario que irá postar.
+		adiciona_usuario(conn, nome_usuario, email, nome_cidade)
+		# Adiciona tres posts.
+		adiciona_post(conn, titulo1, texto, url, email)
+		time.sleep(1)
+		adiciona_post(conn, titulo2, texto, url, email)
+		time.sleep(1)
+		adiciona_post(conn, titulo3, texto, url, email)
+
+		# Checa se o post existe e esta ativo.
+		post_id = acha_post_ativo(conn, titulo1, email)
+		self.assertIsNotNone(post_id)
+
+		# Checa se a consulta retorna: Posts do usuário em ordem cronológica reversa.
+		resultado = consulta_post_ordem_cronologica_reversa(conn, email)
+		self.assertIsNotNone(resultado)
+		self.assertEqual(('terceiro', 'segundo', 'primeiro'), resultado)
 
 
 
@@ -366,7 +399,7 @@ def setUpModule():
 		run_sql_script(filename)
 
 def tearDownModule():
- 	run_sql_script('sql_script/tear_down.sql')
+	run_sql_script('sql_script/tear_down.sql')
 
 
 if __name__ == '__main__':

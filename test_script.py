@@ -183,7 +183,7 @@ class TestProjeto(unittest.TestCase):
 		email_marcado = 'pedroazambuja@hotmail.com'
 		url = 'auera.app'
 		titulo = 'Meu terceiro post sobre passaros!'
-		texto = 'Voce sabia que um avestruz tem o mesmo tamanho de 3 mini camelos – 1,80 a 2,50 metros de altura.'
+		texto = 'Voce sabia que um #avestruz tem o mesmo tamanho de 3 mini camelos – 1,80 a 2,50 metros de altura. @pedroazambuja@hotmail.com'
 		email = 'elijose55@hotmail.com'
 		url = 'auera.app'
 
@@ -193,20 +193,27 @@ class TestProjeto(unittest.TestCase):
 		adiciona_usuario(conn, nome_usuario, email, nome_cidade)
 		# Adiciona o usuario que irá ser marcado.
 		adiciona_usuario(conn, nome_usuario_marcado, email_marcado, nome_cidade)
-		# Adiciona um post.
+		# Adiciona um post que contem marcacoes a passaros e usuarios.
 		adiciona_post(conn, titulo, texto, url, email)
 
 		# Checa se o post existe e esta ativo.
 		post_id = acha_post_ativo(conn, titulo, email)
 		self.assertIsNotNone(post_id)
 
-		# Marca um usuario
-		marca_usuario(conn, post_id, email_marcado)
-
 		# Checa se o usuario foi marcado
 		post = procura_post_por_usuario_tag(conn, email_marcado)
 		self.assertIsNotNone(post)
 		self.assertEqual(post, post_id)
+
+		# Checa se consegue marcar um usuario que nao existe em um post
+		titulo2 = "teste"
+		texto2 = "Ola, @adalberto"
+		adiciona_post(conn, titulo2, texto2, url, email)
+		post_id = acha_post_ativo(conn, titulo2, email)
+
+		# Checa se o usuario inexistente nao foi marcado
+		tag = procura_usuario_tag_por_post(conn, post_id)
+		self.assertIsNone(tag)
 
 	def test_marca_passaro(self):
 		conn = self.__class__.connection

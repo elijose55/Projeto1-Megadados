@@ -350,18 +350,16 @@ def run_sql_script(filename):
 		)
 
 def setUpModule():
-	print(os.listdir())
 	filenames = []
 	for file in os.listdir("sql_script"):
 		if (file.endswith(".sql") and file != "tear_down.sql"):
 			filenames.append("sql_script/" + file)
 
-	print(filenames)
 	for filename in filenames:
 		run_sql_script(filename)
 
-#def tearDownModule():
-# 	run_sql_script('tear_down.sql')
+def tearDownModule():
+ 	run_sql_script('sql_script/tear_down.sql')
 
 
 if __name__ == '__main__':

@@ -283,6 +283,41 @@ class TestProjeto(unittest.TestCase):
 		self.assertEqual(post, post_id)
 
 
+
+	def test_favorita_post(self):
+		conn = self.__class__.connection
+
+		titulo = 'Meu primeiro post sobre passaros!'
+		texto = 'Voce sabia que um avestruz tem o mesmo tamanho de um camelo – 1,80 a 2,50 metros de altura.'
+		email = 'elijose55@hotmail.com'
+		nome_usuario = 'eli joseph'
+		nome_cidade = "sp"
+		nome_usuario_favoritador = "adalberto"
+		email_usuario_favoritador = 'adalberto@hotmail.com'
+		url = 'auera.app'
+
+		# Adiciona o usuario que irá postar.
+		adiciona_usuario(conn, nome_usuario, email, nome_cidade)
+		# Adiciona o usuario que irá favoritar
+		adiciona_usuario(conn, nome_usuario_favoritador, email_usuario_favoritador, nome_cidade)
+
+		# Adiciona um post.
+		adiciona_post(conn, titulo, texto, url, email)
+
+		# Checa se o post existe e esta ativo.
+		post_id = acha_post_ativo(conn, titulo, email)
+		self.assertIsNotNone(post_id)
+
+		# Favorita o post
+		favorita_post(conn, email_usuario_favoritador, post_id)
+
+		# Checa se o favorito foi adicionada na tabela favorito
+		posts = procura_posts_favoritos_por_usuario(conn, email_usuario_favoritador)
+		self.assertIsNotNone(posts)
+		self.assertEqual(posts, post_id)
+
+
+
 	def test_curtidas(self):
 		conn = self.__class__.connection
 

@@ -107,6 +107,14 @@ def visualiza_post(conn, email, post_id, tipo_aparelho, browser, ip):
 		except pymysql.err.IntegrityError as e:
 			raise ValueError(f'Não posso adicionar a visualizacao do post de id: {post_id} na tabela visualizacao')
 
+''' TABELA post_salvo '''
+def favorita_post(conn, email, post_id):
+	with conn.cursor() as cursor:
+		try:
+			cursor.execute('INSERT INTO posts_favoritos (email, post_id) VALUES (%s, %s)', (email, post_id))
+		except pymysql.err.IntegrityError as e:
+			raise ValueError(f'Não posso favoritar o post de id: {post_id} para o usuario: {email} na tabela posts_favoritos')
+
 
 
 ''' TABELA PASSARO_TAG '''
@@ -215,10 +223,10 @@ def procura_post_ativo_por_autor(conn, email):
 
 		res = cursor.fetchall()
 		if len(res) == 0 :
-				return None
+			return None
 		else:
-				posts = tuple(x[0] for x in res)
-				return posts[0]
+			posts = tuple(x[0] for x in res)
+			return posts[0]
 
 
 
@@ -230,10 +238,23 @@ def procura_visualizacao_por_usuario(conn, email):
 
 		res = cursor.fetchall()
 		if len(res) == 0 :
-				return None
+			return None
 		else:
-				visualizacao = tuple(x[0] for x in res)
-				return visualizacao[0]
+			visualizacao = tuple(x[0] for x in res)
+			return visualizacao[0]
+
+def procura_posts_favoritos_por_usuario(conn, email):
+	with conn.cursor() as cursor:
+		cursor.execute('SELECT post_id\
+						FROM posts_favoritos\
+						WHERE posts_favoritos.email=%s', (email))
+
+		res = cursor.fetchall()
+		if len(res) == 0 :
+			return None
+		else:
+			post = tuple(x[0] for x in res)
+			return post[0]
 
 
 def procura_passaro_por_usuario(conn, email): #preferencia --

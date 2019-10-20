@@ -289,6 +289,8 @@ class TestProjeto(unittest.TestCase):
 
 		titulo = 'Meu primeiro post sobre passaros!'
 		texto = 'Voce sabia que um avestruz tem o mesmo tamanho de um camelo – 1,80 a 2,50 metros de altura.'
+		titulo2 = 'ALOHA'
+		texto2 = 'Eu gosto de tucanos'
 		email = 'elijose55@hotmail.com'
 		nome_usuario = 'eli joseph'
 		nome_cidade = "sp"
@@ -303,18 +305,24 @@ class TestProjeto(unittest.TestCase):
 
 		# Adiciona um post.
 		adiciona_post(conn, titulo, texto, url, email)
+		post_id1 = acha_post_ativo(conn, titulo, email)
+		self.assertIsNotNone(post_id1)
 
-		# Checa se o post existe e esta ativo.
-		post_id = acha_post_ativo(conn, titulo, email)
-		self.assertIsNotNone(post_id)
+		# Adiciona outro post.
+		adiciona_post(conn, titulo2, texto2, url, email)
+		post_id2 = acha_post_ativo(conn, titulo2, email)
+		self.assertIsNotNone(post_id2)
 
-		# Favorita o post
-		favorita_post(conn, email_usuario_favoritador, post_id)
+
+		# Favorita os dois posts
+		favorita_post(conn, email_usuario_favoritador, post_id1)
+		favorita_post(conn, email_usuario_favoritador, post_id2)
 
 		# Checa se o favorito foi adicionada na tabela favorito
 		posts = procura_posts_favoritos_por_usuario(conn, email_usuario_favoritador)
 		self.assertIsNotNone(posts)
-		self.assertEqual(posts, post_id)
+		print("AADDD", posts)
+		self.assertEqual(posts, (post_id1, post_id2))
 
 
 

@@ -253,8 +253,8 @@ def procura_posts_favoritos_por_usuario(conn, email):
 		if len(res) == 0 :
 			return None
 		else:
-			post = tuple(x[0] for x in res)
-			return post[0]
+			visualizacao = tuple(x[0] for x in res)
+			return visualizacao
 
 
 def procura_passaro_por_usuario(conn, email): #preferencia --

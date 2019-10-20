@@ -269,15 +269,27 @@ def consulta_usuario_popular(conn):
 		else:
 			return res
 
+
 def consulta_referencia_usuario(conn, email):
 	with conn.cursor() as cursor:
-		cursor.execute('CALL referencia_usuario(%s)', (email))
+		cursor.execute('CALL consulta_referencia_usuario(%s)', (email))
 		res = cursor.fetchall()
 		if len(res) == 0 :
 				return None
 		else:
 				resultado = tuple(x[0] for x in res)
 				return resultado
+
+
+def consulta_quantidade_aparelho(conn):
+	with conn.cursor() as cursor:
+		cursor.execute('SELECT * FROM consulta_quantidade_aparelho')
+		res = cursor.fetchall()
+		print("RES", res)
+		if len(res) == 0 :
+				return None
+		else:
+			return res
 
 
 def coleta_marcacoes(texto): # Retorna as marcacoes de pessoas e passaros de um texto de um post a ser publicado

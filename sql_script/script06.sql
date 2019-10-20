@@ -24,9 +24,9 @@ CREATE VIEW consulta_usuario_popular AS
 	ORDER BY COUNT(*) DESC;
 
 
-DROP PROCEDURE IF EXISTS referencia_usuario;
+DROP PROCEDURE IF EXISTS consulta_referencia_usuario;
 DELIMITER //
-CREATE PROCEDURE referencia_usuario(IN email varchar(30))
+CREATE PROCEDURE consulta_referencia_usuario(IN email varchar(30))
 	BEGIN
 		SELECT DISTINCT post.email
 		FROM post, usuario_tag
@@ -34,3 +34,10 @@ CREATE PROCEDURE referencia_usuario(IN email varchar(30))
 		AND usuario_tag.email = email;
 	END//   
 DELIMITER ;
+
+
+DROP VIEW IF EXISTS consulta_quantidade_aparelho;
+CREATE VIEW consulta_quantidade_aparelho AS 
+	SELECT browser, tipo_aparelho, COUNT(tipo_aparelho)
+	FROM visualizacao
+	GROUP BY browser, tipo_aparelho;

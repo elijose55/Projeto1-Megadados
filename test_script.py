@@ -483,7 +483,58 @@ class TestProjeto(unittest.TestCase):
 		resultado = consulta_usuario_popular(conn)
 
 
+	def test_consulta_quantidade_aparelho(self):
+		conn = self.__class__.connection
 
+		titulo = 'primeiro'
+		texto = 'Voce sabia que um avestruz tem o mesmo tamanho de um camelo.'
+		url = 'auera.app'
+
+		tipo_aparelho1 = 'android'
+		tipo_aparelho2 = 'ios'
+		browser1 = 'chrome'
+		browser2 = 'safari'
+		ip = '192.168.203.16'
+
+		#adiciona 4 usuarios
+		nome_usuario = 'eli joseph'
+		nome_cidade = "sp"
+		email = 'elijose55@hotmail.com'
+		adiciona_usuario(conn, nome_usuario, email, nome_cidade)
+		usuario = acha_usuario(conn, email)
+		self.assertIsNotNone(usuario)
+		adiciona_post(conn, titulo, texto, url, email)
+		post_id = acha_post_ativo(conn, titulo, email)
+		self.assertIsNotNone(post_id)
+
+		nome_usuario = 'pedro'
+		nome_cidade = "sp"
+		email = 'pedro@hotmail.com'
+		adiciona_usuario(conn, nome_usuario, email, nome_cidade)
+		usuario = acha_usuario(conn, email)
+		self.assertIsNotNone(usuario)
+		nome_usuario = 'adalberto'
+		nome_cidade = "mg"
+		email = 'adalberto@hotmail.com'
+		adiciona_usuario(conn, nome_usuario, email, nome_cidade)
+		usuario = acha_usuario(conn, email)
+		self.assertIsNotNone(usuario)
+
+		nome_usuario = 'jones'
+		nome_cidade = "mg"
+		email = 'jones@hotmail.com'
+		adiciona_usuario(conn, nome_usuario, email, nome_cidade)
+		usuario = acha_usuario(conn, email)
+		self.assertIsNotNone(usuario)
+
+		visualiza_post(conn, 'jones@hotmail.com', post_id, tipo_aparelho1, browser1, ip)
+		visualiza_post(conn, 'pedro@hotmail.com', post_id, tipo_aparelho1, browser2, ip)
+		visualiza_post(conn, 'adalberto@hotmail.com', post_id, tipo_aparelho2, browser1, ip)
+		visualiza_post(conn, 'elijose55@hotmail.com', post_id, tipo_aparelho2, browser2, ip)
+
+
+
+		resultado = consulta_quantidade_aparelho(conn)
 
 
 

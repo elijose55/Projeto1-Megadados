@@ -269,6 +269,16 @@ def consulta_usuario_popular(conn):
 		else:
 			return res
 
+def consulta_referencia_usuario(conn, email):
+	with conn.cursor() as cursor:
+		cursor.execute('CALL referencia_usuario(%s)', (email))
+		res = cursor.fetchall()
+		if len(res) == 0 :
+				return None
+		else:
+				resultado = tuple(x[0] for x in res)
+				return resultado
+
 
 def coleta_marcacoes(texto): # Retorna as marcacoes de pessoas e passaros de um texto de um post a ser publicado
 

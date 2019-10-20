@@ -373,6 +373,49 @@ class TestProjeto(unittest.TestCase):
 		self.assertIsNotNone(resultado)
 		self.assertEqual(('terceiro', 'segundo', 'primeiro'), resultado)
 
+	def test_consulta_referencia_usuario(self):
+		conn = self.__class__.connection
+
+		titulo = 'primeiro'
+		texto = 'Voce sabia que um avestruz tem o mesmo tamanho de um camelo.'
+		url = 'auera.app'
+
+		# usuario que vai ser marcado
+		nome_usuario = 'eli joseph'
+		nome_cidade = "sp"
+		email = 'elijose55@hotmail.com'
+		adiciona_usuario(conn, nome_usuario, email, nome_cidade)
+		usuario = acha_usuario(conn, email)
+		self.assertIsNotNone(usuario)
+
+		nome_usuario = 'joao'
+		nome_cidade = "sp"
+		email = 'joao@hotmail.com'
+		texto = 'Voce sabia que um avestruz tem o mesmo tamanho de um camelo. @elijose55@hotmail.com'
+		adiciona_usuario(conn, nome_usuario, email, nome_cidade)
+		usuario = acha_usuario(conn, email)
+		self.assertIsNotNone(usuario)
+		adiciona_post(conn, titulo, texto, url, email)
+		post_id = acha_post_ativo(conn, titulo, email)
+		self.assertIsNotNone(post_id)
+
+		nome_usuario = 'pedro'
+		nome_cidade = "sp"
+		email = 'pedro@hotmail.com'
+		texto = 'Voce sabia que um avestruz tem o mesmo tamanho de um camelo. @elijose55@hotmail.com'
+		adiciona_usuario(conn, nome_usuario, email, nome_cidade)
+		usuario = acha_usuario(conn, email)
+		self.assertIsNotNone(usuario)
+		adiciona_post(conn, titulo, texto, url, email)
+		post_id = acha_post_ativo(conn, titulo, email)
+		self.assertIsNotNone(post_id)
+
+
+		resultado = consulta_referencia_usuario(conn, 'elijose55@hotmail.com')
+		self.assertIsNotNone(resultado)
+		self.assertEqual(resultado, ('joao@hotmail.com', 'pedro@hotmail.com') )
+
+
 	def test_consulta_usuario_popular(self):
 		conn = self.__class__.connection
 
@@ -438,6 +481,8 @@ class TestProjeto(unittest.TestCase):
 
 
 		resultado = consulta_usuario_popular(conn)
+
+
 
 
 

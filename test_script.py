@@ -686,6 +686,9 @@ class TestProjeto(unittest.TestCase):
 
 
 		resultado = consulta_quantidade_aparelho(conn)
+		print(resultado)
+		self.assertIsNotNone(resultado)
+		self.assertEqual(resultado, (('chrome', 'ios', 1), ('safari', 'ios', 1), ('chrome', 'android', 1), ('safari', 'android', 1)) )
 
 
 	def test_consulta_URL_passaros(self):

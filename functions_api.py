@@ -4,26 +4,26 @@ import pymysql
 app = FastAPI()
 
 def connect_db(host='localhost',user='megadados',password='megadados2019',database='redesocial'):
-    connection = pymysql.connect(
+    conn = pymysql.connect(
         host='localhost',
         user='megadados',
         password='megadados2019',
         database='redesocial')
-    return connection
+    return conn
 
 ''' TABELA USUARIOS '''
 @app.post('/usuario')
 def adiciona_usuario(nome_usuario: str,email: str,nome_cidade: str):
-    connection = connect_db()
-    with connection.cursor() as cursor:
+    conn = connect_db()
+    with conn.cursor() as cursor:
         cursor.execute('INSERT INTO usuario (nome_usuario, email, nome_cidade) VALUES (%s, %s, %s)', (nome_usuario, email, nome_cidade))
         cursor.execute('''COMMIT''')
-    connection.close()
+    conn.close()
 
 @app.get('/usuario/{email}')
 def acha_usuario_ativo(email):
-    connection = connect_db()
-    with connection.cursor() as cursor:
+    conn = connect_db()
+    with conn.cursor() as cursor:
         cursor.execute('SELECT email FROM usuario WHERE email = %s AND ativo = 1', (email))
         res = cursor.fetchone()
         if res:
@@ -32,16 +32,16 @@ def acha_usuario_ativo(email):
             return None
 
 @app.put('/usuario/{email}')
-def remove_usuario(email):
-    connection = connect_db()
-    with connection.cursor() as cursor:
+def remove_usuario(email: str):
+    conn = connect_db()
+    with conn.cursor() as cursor:
         cursor.execute('UPDATE usuario SET ativo=0 where email=%s', (email))
         cursor.execute('''COMMIT''')
 
 @app.get('/usuario')
 def lista_usuarios():
-    connection = connect_db()
-    with connection.cursor() as cursor:
+    conn = connect_db()
+    with conn.cursor() as cursor:
         cursor.execute('SELECT email, nome_usuario from usuario')
         cursor.execute('''COMMIT''')
         res = cursor.fetchall()
@@ -52,10 +52,10 @@ def lista_usuarios():
 
 ''' TABELA POST '''
 @app.put('/posts')
-def adiciona_post(titulo,texto,url,email):
+def adiciona_post(titulo: str,texto: str,url: str,email: str):
     pessoas, passaros = coleta_marcacoes(texto)
-    connection = connect_db()
-    with connection.cursor() as cursor:
+    conn = connect_db()
+    with conn.cursor() as cursor:
         cursor.execute('''START TRANSACTION''')
         cursor.execute('INSERT INTO post (titulo, texto, url, email) VALUES (%s, %s, %s, %s)', (titulo, texto, url, email))
         cursor.execute('SELECT post_id FROM post WHERE post_id = LAST_INSERT_ID() LIMIT 1')
@@ -66,11 +66,12 @@ def adiciona_post(titulo,texto,url,email):
         for i in passaros:
             cursor.execute('INSERT INTO passaro_tag (post_id, nome_passaro) VALUES (%s, %s)', (res[0], i))        
         cursor.execute('''COMMIT''')
-    connection.close()
+    conn.close()
 
 
 @app.get('/posts')
-def acha_post_ativo(conn, titulo, email):
+def acha_post_ativo( titulo, email):
+    conn = connect_db()
     with conn.cursor() as cursor:
         cursor.execute('SELECT post_id FROM post WHERE titulo = %s AND email = %s AND ativo = 1', (titulo, email))
         cursor.execute('''COMMIT''')
@@ -83,8 +84,8 @@ def acha_post_ativo(conn, titulo, email):
 
 @app.put('/posts/{post_id}')
 def remove_post(post_id):
-    connection = connect_db()
-    with connection.cursor() as cursor:
+    conn = connect_db()
+    with conn.cursor() as cursor:
         cursor.execute('UPDATE post SET ativo=0 where post_id=%s', (post_id))
         cursor.execute('''COMMIT''')
 
@@ -92,6 +93,7 @@ def remove_post(post_id):
 ''' TABELA VISUALIZACAO '''
 @app.get('/view/{post_id}')
 def visualiza_post(conn, email, post_id, tipo_aparelho, browser, ip):
+    conn = connect_db()
     with conn.cursor() as cursor:
         cursor.execute('INSERT INTO visualizacao (email, post_id, tipo_aparelho, browser, ip) VALUES (%s, %s, %s, %s, %s)', (email, post_id, tipo_aparelho, browser, ip))
         cursor.execute('''COMMIT''')
@@ -99,6 +101,7 @@ def visualiza_post(conn, email, post_id, tipo_aparelho, browser, ip):
 ''' TABELA post_salvo '''
 @app.post('/favoritos/{post_id}')
 def favorita_post(conn, email, post_id):
+    conn = connect_db()
     with conn.cursor() as cursor:
         cursor.execute('INSERT INTO posts_favoritos (email, post_id) VALUES (%s, %s)', (email, post_id))
         cursor.execute('''COMMIT''')
@@ -108,6 +111,7 @@ def favorita_post(conn, email, post_id):
 ''' TABELA PASSARO_TAG '''
 @app.post('/marcapassaro/{post_id}')
 def marca_passaro(conn, post_id, nome_passaro):
+    conn = connect_db()
     with conn.cursor() as cursor:
         cursor.execute('INSERT INTO passaro_tag (post_id, nome_passaro) VALUES (%s, %s)', (post_id, nome_passaro))
         cursor.execute('''COMMIT''')
@@ -115,6 +119,7 @@ def marca_passaro(conn, post_id, nome_passaro):
 ''' TABELA USUARIO_TAG '''
 @app.post('/marcausuario/{post_id}')
 def marca_usuario(conn, post_id, email):
+    conn = connect_db()
     with conn.cursor() as cursor:
         cursor.execute('CALL marca_usuario(%s, %s)', (email, post_id))
         cursor.execute('''COMMIT''')
@@ -122,6 +127,7 @@ def marca_usuario(conn, post_id, email):
 ''' TABELA usuario_passaro '''
 @app.post('/criapreferencia/{email}')
 def cria_preferencia(conn, email, nome_passaro):
+    conn = connect_db()
     with conn.cursor() as cursor:
         cursor.execute('INSERT INTO usuario_passaro (email, nome_passaro) VALUES (%s, %s)', (email, nome_passaro))
         cursor.execute('''COMMIT''')
@@ -131,18 +137,21 @@ def cria_preferencia(conn, email, nome_passaro):
 ''' TABELA curtidas '''
 @app.post('/curtidas/{email}')
 def adiciona_curtida(conn, email, post_id, tipo):
+    conn = connect_db()
     with conn.cursor() as cursor:
         cursor.execute('CALL adiciona_curtidas(%s, %s, %s)', (email, post_id, tipo))
         cursor.execute('''COMMIT''')
 
 @app.delete('/curtidas/{email}')
 def remove_curtida(conn, email, post_id):
+    conn = connect_db()
     with conn.cursor() as cursor:
         cursor.execute('DELETE FROM curtidas WHERE email=%s AND post_id=%s', (email, post_id))
         cursor.execute('''COMMIT''')
 
 @app.get('/curtidas/{post_id}')
 def acha_curtidas_post(conn, post_id):
+    conn = connect_db()
     with conn.cursor() as cursor:
         cursor.execute('SELECT tipo FROM curtidas WHERE post_id = %s', (post_id))
         cursor.execute('''COMMIT''')
@@ -155,6 +164,7 @@ def acha_curtidas_post(conn, post_id):
 ''' SELECOES '''
 @app.get('/posts/passarotag/{nome_passaro}')
 def procura_post_por_passaro_tag(conn, nome_passaro):
+    conn = connect_db()
     with conn.cursor() as cursor:
         cursor.execute('SELECT a.post_id\
                         FROM post a, passaro_tag b\
@@ -171,6 +181,7 @@ def procura_post_por_passaro_tag(conn, nome_passaro):
             return posts[0]
 @app.get('/posts/usuariotag/{email}')
 def procura_post_por_usuario_tag(conn, email):
+    conn = connect_db()
     with conn.cursor() as cursor:
         cursor.execute('SELECT a.post_id\
                         FROM post a, usuario_tag b, usuario c\
@@ -185,6 +196,7 @@ def procura_post_por_usuario_tag(conn, email):
                 return posts[0]
 @app.get('/usuario/usuariotag/{post_id}')
 def procura_usuario_tag_por_post(conn, post_id):
+    conn = connect_db()
     with conn.cursor() as cursor:
         cursor.execute('SELECT post.email\
                         FROM post, usuario_tag\
@@ -201,6 +213,7 @@ def procura_usuario_tag_por_post(conn, post_id):
 
 @app.get('/posts/autor/{email}')
 def procura_post_ativo_por_autor(conn, email):
+    conn = connect_db()
     with conn.cursor() as cursor:
         cursor.execute('SELECT post_id\
                         FROM post\
@@ -218,6 +231,7 @@ def procura_post_ativo_por_autor(conn, email):
 
 @app.get('/posts/usuarioview/{email}')
 def procura_visualizacao_por_usuario(conn, email):
+    conn = connect_db()
     with conn.cursor() as cursor:
         cursor.execute('SELECT post_id\
                         FROM visualizacao v\
@@ -232,6 +246,7 @@ def procura_visualizacao_por_usuario(conn, email):
             return visualizacao[0]
 @app.get('/posts/favorito/{email}')
 def procura_posts_favoritos_por_usuario(conn, email):
+    conn = connect_db()
     with conn.cursor() as cursor:
         cursor.execute('SELECT post_id\
                         FROM posts_favoritos\
@@ -247,6 +262,7 @@ def procura_posts_favoritos_por_usuario(conn, email):
 
 @app.get('/passaro/preferencia/{email}')
 def procura_passaro_por_usuario(conn, email): #preferencia --
+    conn = connect_db()
     with conn.cursor() as cursor:
         cursor.execute('SELECT nome_passaro\
                         FROM usuario NATURAL JOIN usuario_passaro\
@@ -261,6 +277,7 @@ def procura_passaro_por_usuario(conn, email): #preferencia --
                 return passaros[0]
 @app.get('/posts/ordenados/{email}')
 def consulta_post_ordem_cronologica_reversa(conn, email):
+    conn = connect_db()
     with conn.cursor() as cursor:
         cursor.execute('CALL consulta_post_ordem_cronologica_reversa(%s)', (email))
         cursor.execute('''COMMIT''')
@@ -272,6 +289,7 @@ def consulta_post_ordem_cronologica_reversa(conn, email):
                 return resultado
 @app.get('/usuario/usuario_popular/{nome_cidade}')
 def consulta_usuario_popular(conn):
+    conn = connect_db()
     with conn.cursor() as cursor:
         cursor.execute('SELECT * FROM consulta_usuario_popular')
         cursor.execute('''COMMIT''')
@@ -284,6 +302,7 @@ def consulta_usuario_popular(conn):
 
 @app.get('/referencia/{email}')
 def consulta_referencia_usuario(conn, email):
+    conn = connect_db()
     with conn.cursor() as cursor:
         cursor.execute('CALL consulta_referencia_usuario(%s)', (email))
         cursor.execute('''COMMIT''')
@@ -296,6 +315,7 @@ def consulta_referencia_usuario(conn, email):
 
 @app.get('/quantidade-aparelho')
 def consulta_quantidade_aparelho(conn):
+    conn = connect_db()
     with conn.cursor() as cursor:
         cursor.execute('SELECT * FROM consulta_quantidade_aparelho')
         cursor.execute('''COMMIT''')
@@ -307,6 +327,7 @@ def consulta_quantidade_aparelho(conn):
 
 @app.get('/url-passaros/{post_id}')
 def consulta_URL_passaros(conn):
+    conn = connect_db()
     with conn.cursor() as cursor:
         cursor.execute('SELECT * FROM consulta_URL_passaros')
         cursor.execute('''COMMIT''')

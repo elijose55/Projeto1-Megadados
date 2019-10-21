@@ -31,12 +31,12 @@ def acha_usuario_ativo(conn, email):
 		else:
 			return None
 
-def muda_nome_usuario(conn, email, novo_nome_usuario):
-	with conn.cursor() as cursor:
-		try:
-			cursor.execute('UPDATE usuario SET nome_usuario=%s where email=%s', (novo_nome_usuario, email))
-		except pymysql.err.IntegrityError as e:
-			raise ValueError(f'Não posso alterar nome do usuario com email: {email} para {novo_nome_usuario} na tabela usuario')
+# def muda_nome_usuario(conn, email, novo_nome_usuario):
+# 	with conn.cursor() as cursor:
+# 		try:
+# 			cursor.execute('UPDATE usuario SET nome_usuario=%s where email=%s', (novo_nome_usuario, email))
+# 		except pymysql.err.IntegrityError as e:
+# 			raise ValueError(f'Não posso alterar nome do usuario com email: {email} para {novo_nome_usuario} na tabela usuario')
 
 def remove_usuario(conn, email):
 	with conn.cursor() as cursor:

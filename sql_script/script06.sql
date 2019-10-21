@@ -16,12 +16,14 @@ DELIMITER ;
 
 DROP VIEW IF EXISTS consulta_usuario_popular;
 CREATE VIEW consulta_usuario_popular AS
-	SELECT u.nome_usuario, u.email, u.nome_cidade, COUNT(v.post_id)
-	FROM usuario u, post p, visualizacao v
-	WHERE u.email = p.email
-	AND v.post_id = p.post_id
-	GROUP BY v.post_id
-	ORDER BY COUNT(*) DESC;
+	SELECT query.email, query.nome_cidade, MAX(query.c) FROM
+		(SELECT u.email, u.nome_cidade, COUNT(v.post_id) as c
+		FROM usuario u, post p, visualizacao v
+		WHERE u.email = p.email
+		AND v.post_id = p.post_id
+		AND p.ativo = 1
+		GROUP BY v.email) as query
+	GROUP BY query.nome_cidade;
 
 
 DROP PROCEDURE IF EXISTS consulta_referencia_usuario;

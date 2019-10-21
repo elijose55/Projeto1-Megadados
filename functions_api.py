@@ -153,13 +153,15 @@ def acha_curtidas_post(conn, post_id):
             return None
 
 ''' SELECOES '''
-
+@app.get('/posts/passarotag/{nome_passaro}')
 def procura_post_por_passaro_tag(conn, nome_passaro):
 	with conn.cursor() as cursor:
 		cursor.execute('SELECT a.post_id\
 						FROM post a, passaro_tag b\
 						WHERE a.post_id = b.post_id\
 						AND b.nome_passaro=%s', (nome_passaro))
+        cursor.execute('''COMMIT''')
+
 
 		res = cursor.fetchall()
 		if len(res) == 0 :
@@ -167,12 +169,13 @@ def procura_post_por_passaro_tag(conn, nome_passaro):
 		else:
 				posts = tuple(x[0] for x in res)
 				return posts[0]
-
+@app.get('/posts/usuariotag/{email}')
 def procura_post_por_usuario_tag(conn, email):
 	with conn.cursor() as cursor:
 		cursor.execute('SELECT a.post_id\
 						FROM post a, usuario_tag b, usuario c\
 						WHERE a.post_id = b.post_id AND c.email= %s', (email))
+        cursor.execute('''COMMIT''')
 
 		res = cursor.fetchall()
 		if len(res) == 0 :
@@ -180,13 +183,14 @@ def procura_post_por_usuario_tag(conn, email):
 		else:
 				posts = tuple(x[0] for x in res)
 				return posts[0]
-
+@app.get('/usuario/usuariotag/{post_id}')
 def procura_usuario_tag_por_post(conn, post_id):
 	with conn.cursor() as cursor:
 		cursor.execute('SELECT post.email\
 						FROM post, usuario_tag\
 						WHERE post.post_id = usuario_tag.post_id\
 						AND usuario_tag.post_id = %s', (post_id))
+        cursor.execute('''COMMIT''')
 
 		res = cursor.fetchall()
 		if len(res) == 0 :
@@ -195,13 +199,14 @@ def procura_usuario_tag_por_post(conn, post_id):
 				posts = tuple(x[0] for x in res)
 				return posts[0]
 
-
+@app.get('/posts/autor/{email}')
 def procura_post_ativo_por_autor(conn, email):
 	with conn.cursor() as cursor:
 		cursor.execute('SELECT post_id\
 						FROM post\
 						WHERE post.email = %s\
 						AND post.ativo = 1', (email))
+        cursor.execute('''COMMIT''')
 
 		res = cursor.fetchall()
 		if len(res) == 0 :
@@ -211,12 +216,13 @@ def procura_post_ativo_por_autor(conn, email):
 			return posts[0]
 
 
-
+@app.get('/posts/usuarioview/{email}')
 def procura_visualizacao_por_usuario(conn, email):
 	with conn.cursor() as cursor:
 		cursor.execute('SELECT post_id\
 						FROM visualizacao v\
 						WHERE v.email=%s', (email))
+        cursor.execute('''COMMIT''')
 
 		res = cursor.fetchall()
 		if len(res) == 0 :
@@ -224,12 +230,13 @@ def procura_visualizacao_por_usuario(conn, email):
 		else:
 			visualizacao = tuple(x[0] for x in res)
 			return visualizacao[0]
-
+@app.get('/posts/favorito/{email}')
 def procura_posts_favoritos_por_usuario(conn, email):
 	with conn.cursor() as cursor:
 		cursor.execute('SELECT post_id\
 						FROM posts_favoritos\
 						WHERE posts_favoritos.email=%s', (email))
+        cursor.execute('''COMMIT''')
 
 		res = cursor.fetchall()
 		if len(res) == 0 :
@@ -238,12 +245,13 @@ def procura_posts_favoritos_por_usuario(conn, email):
 			visualizacao = tuple(x[0] for x in res)
 			return visualizacao
 
-
+@app.get('/passaro/preferencia/{email}')
 def procura_passaro_por_usuario(conn, email): #preferencia --
 	with conn.cursor() as cursor:
 		cursor.execute('SELECT nome_passaro\
 						FROM usuario NATURAL JOIN usuario_passaro\
 						WHERE usuario_passaro.email = %s AND usuario.ativo = 1', (email))
+        cursor.execute('''COMMIT''')
 
 		res = cursor.fetchall()
 		if len(res) == 0 :
@@ -251,20 +259,22 @@ def procura_passaro_por_usuario(conn, email): #preferencia --
 		else:
 				passaros = tuple(x[0] for x in res)
 				return passaros[0]
-
+@app.get('/posts/ordenados/{email}')
 def consulta_post_ordem_cronologica_reversa(conn, email):
 	with conn.cursor() as cursor:
 		cursor.execute('CALL consulta_post_ordem_cronologica_reversa(%s)', (email))
+        cursor.execute('''COMMIT''')
 		res = cursor.fetchall()
 		if len(res) == 0 :
 				return None
 		else:
 				resultado = tuple(x[0] for x in res)
 				return resultado
-
+@app.get('/usuario/usuario_popular/{nome_cidade}')
 def consulta_usuario_popular(conn):
 	with conn.cursor() as cursor:
 		cursor.execute('SELECT * FROM consulta_usuario_popular')
+        cursor.execute('''COMMIT''')
 		res = cursor.fetchall()
 		print("AAAA", res)
 		if len(res) == 0 :
@@ -272,10 +282,11 @@ def consulta_usuario_popular(conn):
 		else:
 			return res
 
-
+@app.get('/referencia/{email}')
 def consulta_referencia_usuario(conn, email):
 	with conn.cursor() as cursor:
 		cursor.execute('CALL consulta_referencia_usuario(%s)', (email))
+        cursor.execute('''COMMIT''')
 		res = cursor.fetchall()
 		if len(res) == 0 :
 				return None
@@ -283,20 +294,22 @@ def consulta_referencia_usuario(conn, email):
 				resultado = tuple(x[0] for x in res)
 				return resultado
 
-
+@app.get('/quantidade-aparelho')
 def consulta_quantidade_aparelho(conn):
 	with conn.cursor() as cursor:
 		cursor.execute('SELECT * FROM consulta_quantidade_aparelho')
+        cursor.execute('''COMMIT''')
 		res = cursor.fetchall()
 		if len(res) == 0 :
 				return None
 		else:
 			return res
 
-
+@app.get('/url-passaros/{post_id}')
 def consulta_URL_passaros(conn):
 	with conn.cursor() as cursor:
 		cursor.execute('SELECT * FROM consulta_URL_passaros')
+        cursor.execute('''COMMIT''')
 		res = cursor.fetchall()
 		if len(res) == 0 :
 				return None

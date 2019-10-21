@@ -107,7 +107,7 @@ def visualiza_post(conn, email, post_id, tipo_aparelho, browser, ip):
 		except pymysql.err.IntegrityError as e:
 			raise ValueError(f'Não posso adicionar a visualizacao do post de id: {post_id} na tabela visualizacao')
 
-''' TABELA post_salvo '''
+''' TABELA posts_favoritos '''
 def favorita_post(conn, email, post_id):
 	with conn.cursor() as cursor:
 		try:
@@ -115,6 +115,34 @@ def favorita_post(conn, email, post_id):
 		except pymysql.err.IntegrityError as e:
 			raise ValueError(f'Não posso favoritar o post de id: {post_id} para o usuario: {email} na tabela posts_favoritos')
 
+def desfavorita_post(conn, email, post_id):
+	with conn.cursor() as cursor:
+		try:
+			cursor.execute('DELETE FROM posts_favoritos WHERE email=%s AND post_id=%s', (email, post_id))
+		except pymysql.err.IntegrityError as e:
+			raise ValueError(f'Não posso desfavoritar o post de id: {post_id} para o usuario: {email} na tabela posts_favoritos')
+
+def acha_favoritos_usuario(conn, email):
+	with conn.cursor() as cursor:
+		cursor.execute('SELECT post_id FROM posts_favoritos WHERE email = %s', (email))
+		res = cursor.fetchall()
+		if len(res) == 0 :
+			return None
+		else:
+			resultado = tuple(x[0] for x in res)
+			return resultado
+
+
+
+def acha_favoritos_post(conn, post_id):
+	with conn.cursor() as cursor:
+		cursor.execute('SELECT post_id FROM posts_favoritos WHERE post_id = %s', (post_id))
+		res = cursor.fetchall()
+		if len(res) == 0 :
+			return None
+		else:
+			resultado = tuple(x[0] for x in res)
+			return resultado
 
 
 ''' TABELA PASSARO_TAG '''
@@ -168,6 +196,16 @@ def acha_curtidas_post(conn, post_id):
 			return res[0]
 		else:
 			return None
+
+def acha_curtidas_usuario(conn, email):
+	with conn.cursor() as cursor:
+		cursor.execute('SELECT post_id FROM curtidas WHERE email = %s', (email))
+		res = cursor.fetchall()
+		if len(res) == 0 :
+			return None
+		else:
+			resultado = tuple(x[0] for x in res)
+			return resultado
 
 
 ''' SELECOES '''
@@ -242,19 +280,6 @@ def procura_visualizacao_por_usuario(conn, email):
 		else:
 			visualizacao = tuple(x[0] for x in res)
 			return visualizacao[0]
-
-def procura_posts_favoritos_por_usuario(conn, email):
-	with conn.cursor() as cursor:
-		cursor.execute('SELECT post_id\
-						FROM posts_favoritos\
-						WHERE posts_favoritos.email=%s', (email))
-
-		res = cursor.fetchall()
-		if len(res) == 0 :
-			return None
-		else:
-			visualizacao = tuple(x[0] for x in res)
-			return visualizacao
 
 
 def procura_passaro_por_usuario(conn, email): #preferencia --

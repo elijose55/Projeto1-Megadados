@@ -1,4 +1,5 @@
 USE REDESOCIAL;
+DROP TABLE IF EXISTS curtidas;
 
 CREATE TABLE curtidas (
 	email VARCHAR(30) NOT NULL,

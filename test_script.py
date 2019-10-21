@@ -66,22 +66,47 @@ class TestProjeto(unittest.TestCase):
 			pass
 
 		# Checa se o usuario existe.
-		id = acha_usuario(conn, email)
-		self.assertIsNotNone(id)
+		_id = acha_usuario(conn, email)
+		self.assertIsNotNone(_id)
 
 		# Tenta achar um usuario inexistente.
-		id = acha_usuario(conn, "naoexiste@hotmail.com")
-		self.assertIsNone(id)
+		_id = acha_usuario(conn, "naoexiste@hotmail.com")
+		self.assertIsNone(_id)
 
 	def test_remove_usuario(self):
 		conn = self.__class__.connection
 
+		titulo = 'Meu primeiro post sobre passaros!'
+		texto = 'Voce sabia que um avestruz tem o mesmo tamanho de um camelo – 1,80 a 2,50 metros de altura.'
+		email = 'elijose5@hotmail.com'
 		nome_usuario = 'eli joseph'
-		email = 'elijose55@hotmail.com'
 		nome_cidade = "sp"
+		url = 'auera.app'
 
-		# Adiciona um usuario não existente.
+		# Adiciona o usuario que irá postar.
 		adiciona_usuario(conn, nome_usuario, email, nome_cidade)
+
+		# Adiciona um post.
+		adiciona_post(conn, titulo, texto, url, email)
+		post_id = acha_post_ativo(conn, titulo, email)
+		self.assertIsNotNone(post_id)
+
+
+		# Favorita o post
+		favorita_post(conn, email, post_id)
+
+		# Curte o post
+		adiciona_curtida(conn, email, post_id, 1)
+
+		# Checa se o favorito foi adicionada na tabela favorito
+		posts = acha_favoritos_usuario(conn, email)
+		self.assertIsNotNone(posts)
+
+		# Checa se o usuario existe.
+		_id = acha_usuario(conn, email)
+		self.assertIsNotNone(_id)
+
+		# Remove o usuario
 		remove_usuario(conn, email)
 
 		# Checa se o usuario ainda existe.
@@ -92,12 +117,12 @@ class TestProjeto(unittest.TestCase):
 		_id = procura_post_ativo_por_autor(conn, email)
 		self.assertIsNone(_id)
 
-		# Checa se ainda existe alguma preferencia daquele usuario
-		_id = procura_passaro_por_usuario(conn, email)
+		# Checa se ainda existe alguma curtida daquele usuario
+		_id = acha_curtidas_usuario(conn, email)
 		self.assertIsNone(_id)
 
-		# Checa se ainda existe alguma marcacao aquele usuario
-		_id = procura_post_por_usuario_tag(conn, email)
+		# Checa se ainda existe algum favorito daquele usuario
+		_id = acha_favoritos_usuario(conn, email)
 		self.assertIsNone(_id)
 
 	def test_adiciona_preferencia(self):
@@ -168,13 +193,28 @@ class TestProjeto(unittest.TestCase):
 		post_id = acha_post_ativo(conn, titulo, email)
 		self.assertIsNotNone(post_id)
 
+		# Favorita o post
+		favorita_post(conn, email, post_id)
+
+		# Curte o post
+		adiciona_curtida(conn, email, post_id, 1)
+
 
 		# Remove o post
 		remove_post(conn, post_id)
 
+
 		# Checa se o post existe e nao esta ativo.
-		id = acha_post_ativo(conn, titulo, email)
-		self.assertIsNone(id)
+		_id = acha_post_ativo(conn, titulo, email)
+		self.assertIsNone(_id)
+
+		# Checa se ainda existe alguma curtida daquele post
+		_id = acha_curtidas_post(conn, post_id)
+		self.assertIsNone(_id)
+
+		# Checa se ainda existe algum favorito daquele post
+		_id = acha_favoritos_post(conn, post_id)
+		self.assertIsNone(_id)
 
 	def test_marca_usuario(self):
 		conn = self.__class__.connection
@@ -318,11 +358,70 @@ class TestProjeto(unittest.TestCase):
 		favorita_post(conn, email_usuario_favoritador, post_id1)
 		favorita_post(conn, email_usuario_favoritador, post_id2)
 
+		# Checa se consegue favoritar o mesmo post duas vezes
+		try:
+			favorita_post(conn, email_usuario_favoritador, post_id1)
+			self.fail('Nao deveria ter favoritado o mesmo post duas vezes para o mesmo usuario.')
+		except ValueError as e:
+			pass
+
+		# Checa se consegue favoritar um post inexistente
+		try:
+			favorita_post(conn, email_usuario_favoritador, 1000)
+			self.fail('Nao deveria ter favoritado um post inexistente.')
+		except ValueError as e:
+			pass
+
 		# Checa se o favorito foi adicionada na tabela favorito
-		posts = procura_posts_favoritos_por_usuario(conn, email_usuario_favoritador)
+		posts = acha_favoritos_usuario(conn, email_usuario_favoritador)
 		self.assertIsNotNone(posts)
-		print("AADDD", posts)
 		self.assertEqual(posts, (post_id1, post_id2))
+
+
+
+	def test_desfavorita_post(self):
+		conn = self.__class__.connection
+
+		titulo = 'Meu primeiro post sobre passaros!'
+		texto = 'Voce sabia que um avestruz tem o mesmo tamanho de um camelo – 1,80 a 2,50 metros de altura.'
+		email = 'elijose55@hotmail.com'
+		nome_usuario = 'eli joseph'
+		nome_cidade = "sp"
+		nome_usuario_favoritador = "adalberto"
+		email_usuario_favoritador = 'adalberto@hotmail.com'
+		url = 'auera.app'
+
+		# Adiciona o usuario que irá postar.
+		adiciona_usuario(conn, nome_usuario, email, nome_cidade)
+		# Adiciona o usuario que irá favoritar
+		adiciona_usuario(conn, nome_usuario_favoritador, email_usuario_favoritador, nome_cidade)
+
+		# Adiciona um post.
+		adiciona_post(conn, titulo, texto, url, email)
+		post_id = acha_post_ativo(conn, titulo, email)
+		self.assertIsNotNone(post_id)
+
+
+		# Favorita o post
+		favorita_post(conn, email_usuario_favoritador, post_id)
+
+		# Checa se consegue favoritar o mesmo post duas vezes
+		try:
+			favorita_post(conn, email_usuario_favoritador, post_id)
+			self.fail('Nao deveria ter favoritado o mesmo post duas vezes para o mesmo usuario.')
+		except ValueError as e:
+			pass
+
+		# Checa se o favorito foi adicionada na tabela favorito
+		posts = acha_favoritos_usuario(conn, email_usuario_favoritador)
+		self.assertIsNotNone(posts)
+
+		# Checa se consegue desfavoritar o post
+		desfavorita_post(conn, email_usuario_favoritador, post_id)
+
+		# Checa se o favorito foi removido da tabela favorito
+		posts = acha_favoritos_usuario(conn, email_usuario_favoritador)
+		self.assertIsNone(posts)
 
 
 
@@ -350,6 +449,13 @@ class TestProjeto(unittest.TestCase):
 		# Checa se o post existe e esta ativo.
 		post_id = acha_post_ativo(conn, titulo, email)
 		self.assertIsNotNone(post_id)
+
+		# Checa se consegue curtir um post inexistente
+		try:
+			adiciona_curtida(conn, email, 1000, 1)
+			self.fail('Nao deveria ter curtido um post inexistente.')
+		except ValueError as e:
+			pass
 
 
 		# Adiciona uma curtida positiva ao post

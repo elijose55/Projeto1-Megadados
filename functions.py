@@ -309,7 +309,6 @@ def consulta_usuario_popular(conn):
 	with conn.cursor() as cursor:
 		cursor.execute('SELECT * FROM consulta_usuario_popular')
 		res = cursor.fetchall()
-		print("AAAA", res)
 		if len(res) == 0 :
 				return None
 		else:

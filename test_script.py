@@ -630,6 +630,8 @@ class TestProjeto(unittest.TestCase):
 
 
 		resultado = consulta_usuario_popular(conn)
+		self.assertIsNotNone(resultado)
+		self.assertEqual(resultado, (('pedro@hotmail.com', 'sp', 1), ('adalberto@hotmail.com', 'mg', 3)))
 
 
 	def test_consulta_quantidade_aparelho(self):

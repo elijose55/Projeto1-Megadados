@@ -22,7 +22,7 @@ CREATE VIEW consulta_usuario_popular AS
 		WHERE u.email = p.email
 		AND v.post_id = p.post_id
 		AND p.ativo = 1
-		GROUP BY v.email) as query
+		GROUP BY v.post_id) as query
 	GROUP BY query.nome_cidade;
 
 
